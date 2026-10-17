@@ -376,8 +376,8 @@ async function loadRadarrComingSoon() {
 
 // Temporarily do the radarr trailer call
     
-//let mt = new movieTrailers()
-//  rtCards = await mt.AssembleRadarrTrailers(csrCards,"xx")
+let mt = new movieTrailers()
+  //rtCards = await mt.AssembleRadarrTrailers(csrCards,"99a3739ec3bbafa63ac1fc359715012a")
 
   return csrCards;
 }
@@ -537,6 +537,7 @@ async function loadNowScreening() {
             appColour = GREEN;
             appIcon = 17668;            
               break;
+          console.log(1);
           default:
             appColour = RED;
         }
@@ -644,7 +645,7 @@ async function loadNowScreening() {
     }
   } catch (err) {
     let now = new Date();
-    console.log(now.toLocaleString() + " *Now Showing. - Get full data: " + err);
+    console.log(now.toLocaleString() + " *Now Showing. - Get full data: " + dumpError(err));
     pollInterval = nsCheckSeconds + 60000;
     console.log(
       "✘✘ WARNING ✘✘ - Next Now Screening query will be delayed by 1 minute:",
@@ -1520,6 +1521,7 @@ app.get(BASEURL + "/getcards", (req, res) => {
 });
 
 // Used by the web client to check connection status to Posterr, and also to determine if there was a cold start that was missed
+
 app.get(BASEURL + "/conncheck", (req, res) => {
   res.send({ "status": cold_start_time, "sleep": sleep });
 });
@@ -1977,3 +1979,18 @@ app.post(
 app.listen(PORT, () => {
   console.log(`✅ Web server started on internal port ` + PORT);
 });
+
+function dumpError(err) {
+  if (typeof err === 'object') {
+    if (err.message) {
+      console.log('\nMessage: ' + err.message)
+    }
+    if (err.stack) {
+      console.log('\nStacktrace:')
+      console.log('====================')
+      console.log(err.stack);
+    }
+  } else {
+    console.log('dumpError :: argument is not an object');
+  }
+}

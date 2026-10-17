@@ -1,0 +1,45 @@
+#!/bin/bash
+# ----------------------------------------
+# install posterr and watchtower docker containers
+#  Ensure you have created an account on hub.docker.com and you remember the username and password
+#  - docker login --username <your username> --password <your password>
+#  Run this script from a linux terminal, as follows:
+#  wget https://raw.githubusercontent.com/petersem/posterr/refs/heads/master/scripts/install-poster.sh -O script.sh && chmod +x script.sh && ./script.sh && rm script.sh
+# ----------------------------------------  
+
+cd /home/$LOGNAME
+mkdir docker
+mkdir docker/posterr
+mkdir docker/posterr/config
+mkdir docker/posterr/custom
+cd docker
+TZ_VALUE=$(readlink /etc/localtime | sed 's|.*/zoneinfo/||')
+
+docker run -d \
+  --name posterr \
+  --restart always \
+  -e TZ=$TZ_VALUE \
+  -v /home/$LOGNAME/docker/posterr/custom:/usr/src/app/public/custom \
+  -v /home/$LOGNAME/docker/posterr/config:/usr/src/app/config \
+  -p 9876:3000 \
+  petersem/posterr
+
+docker run -d \
+  --name watchtower \
+  --restart always \
+  -e TZ=$TZ_VALUE \
+  -e WATCHTOWER_REMOVE_VOLUMES=true \
+  -e WATCHTOWER_CLEANUP=true \
+  -e WATCHTOWER_INCLUDE_STOPPED=true \
+  -e WATCHTOWER_POLL_INTERVAL=15000 \
+  -e WATCHTOWER_TIMEOUT=30s \
+  -e WATCHTOWER_NOTIFICATIONS_LEVEL=error \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -p 8811:8080 \
+  nickfedor/watchtower
+
+docker ps -a --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" | (read -r; printf "%s\n" "$REPLY"; sort -k 1 )
+echo 'If you see the posterr and watchtower containers listed, then you are done!'
+
+# Run this script from a linux terminal, as follows:
+# wget https://raw.githubusercontent.com/petersem/posterr/refs/heads/master/scripts/install-poster.sh -O script.sh && chmod +x script.sh && ./script.sh && rm script.sh
