@@ -18,23 +18,72 @@ class Health {
   }
 
   async PlexNSCheck() {
-    let ms = new pms({
-      plexHTTPS: this.settings.plexHTTPS,
-      plexIP: this.settings.plexIP,
-      plexPort: this.settings.plexPort,
-      plexToken: this.settings.plexToken,
-    });
+    // FORK (dual-plex): check the primary server, plus the second server
+    // when enabled, and log every live session's title, user and device
+    // (Player title) — the exact strings the Now Screening user/device
+    // filters match against, so they can be copied into Settings as-is.
+    const servers = [
+      {
+        label: "Primary",
+        HTTPS: this.settings.plexHTTPS === "true",
+        plexIP: this.settings.plexIP,
+        plexPort: this.settings.plexPort,
+        plexToken: this.settings.plexToken,
+      },
+    ];
+    if (
+      this.settings.plex2Enabled === "true" &&
+      this.settings.plex2IP !== undefined && this.settings.plex2IP !== "" &&
+      this.settings.plex2Token !== undefined && this.settings.plex2Token !== ""
+    ) {
+      servers.push({
+        label: "Second",
+        HTTPS: this.settings.plex2HTTPS === "true",
+        plexIP: this.settings.plex2IP,
+        plexPort: this.settings.plex2Port,
+        plexToken: this.settings.plex2Token,
+      });
+    }
 
-    try {
-      let result = await Promise.resolve(ms.client.query("/status/sessions"));
-      if(result.MediaContainer.size == 0){
-        console.log("Nothing returned as playing. Please verify this is correct");
+    for (const srv of servers) {
+      const where = srv.plexIP + ":" + srv.plexPort;
+      let ms = new pms({
+        HTTPS: srv.HTTPS,
+        plexIP: srv.plexIP,
+        plexPort: srv.plexPort,
+        plexToken: srv.plexToken,
+      });
+      try {
+        let result = await ms.client.query("/status/sessions");
+        const mc = result.MediaContainer || {};
+        const items = mc.Metadata || [];
+        if (!mc.size || items.length === 0) {
+          console.log(srv.label + " server (" + where + "): nothing playing.");
+          continue;
+        }
+        console.log(
+          srv.label + " server (" + where + "): " + items.length + " media item(s) playing:"
+        );
+        for (const md of items) {
+          const user =
+            md.User && md.User.title !== undefined ? md.User.title : "(unknown user)";
+          const device =
+            md.Player && md.Player.title !== undefined
+              ? md.Player.title
+              : "(unknown device)";
+          let title = md.title || "(untitled)";
+          if (md.type === "episode" && md.grandparentTitle) {
+            title = md.grandparentTitle + " - " + title;
+          }
+          console.log(
+            " - \"" + title + "\" (" + md.type + ")" +
+              " | user (filter string): \"" + user + "\"" +
+              " | device (filter string): \"" + device + "\""
+          );
+        }
+      } catch (err) {
+        console.log(srv.label + " server (" + where + "): check failed - " + err);
       }
-      else{
-        console.log(result.MediaContainer.size + " media item(s) playing.");
-      }
-    } catch (err) {
-      console.log(err);
     }
   }
 
