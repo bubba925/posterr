@@ -477,12 +477,31 @@ async function loadNowScreening() {
   }
 
   // load MediaServer(s) (switch statement for different server settings server option - TODO)
+  // NOTE: the Plex class expects a boolean `HTTPS`; the settings store the
+  // string "true"/"false", so convert here. (Upstream passed `plexHTTPS:`,
+  // a key the class ignores, which silently forced plain HTTP.)
   let ms = new pms({
-    plexHTTPS: loadedSettings.plexHTTPS,
+    HTTPS: loadedSettings.plexHTTPS === "true",
     plexIP: loadedSettings.plexIP,
     plexPort: loadedSettings.plexPort,
     plexToken: loadedSettings.plexToken,
   });
+
+  // FORK (dual-plex): optional second Plex server, polled for Now Screening
+  // only. On-demand / library features keep using the primary server above.
+  let ms2 = null;
+  if (
+    loadedSettings.plex2Enabled === "true" &&
+    loadedSettings.plex2IP !== undefined && loadedSettings.plex2IP !== "" &&
+    loadedSettings.plex2Token !== undefined && loadedSettings.plex2Token !== ""
+  ) {
+    ms2 = new pms({
+      HTTPS: loadedSettings.plex2HTTPS === "true",
+      plexIP: loadedSettings.plex2IP,
+      plexPort: loadedSettings.plex2Port,
+      plexToken: loadedSettings.plex2Token,
+    });
+  }
 
   let excludeLibraries;
   if(loadedSettings.excludeLibs !== undefined && loadedSettings.excludeLibs !== ""){
@@ -509,6 +528,32 @@ async function loadNowScreening() {
       loadedSettings.hideUser,
       excludeLibraries
     );
+
+    // FORK (dual-plex): merge Now Screening sessions from the second server.
+    // A failure on the second server must not take down Now Screening, so it
+    // is caught here and logged instead of reaching the outer catch (which
+    // would delay the next poll and flag the primary server as unavailable).
+    if (ms2) {
+      try {
+        const nsCards2 = await ms2.GetNowScreening(
+          loadedSettings.playThemes,
+          loadedSettings.genericThemes,
+          loadedSettings.hasArt,
+          loadedSettings.filterRemote,
+          loadedSettings.filterLocal,
+          loadedSettings.filterDevices,
+          loadedSettings.filterUsers,
+          loadedSettings.hideUser,
+          excludeLibraries
+        );
+        if (nsCards2 && nsCards2.length > 0) {
+          nsCards = nsCards.concat(nsCards2);
+        }
+      } catch (err2) {
+        let now = new Date();
+        console.log(now.toLocaleString() + " *Now Scrn. - Second Plex server unavailable: " + err2);
+      }
+    }
     // Send to Awtrix, if enabled
     if(isAwtrixEnabled){
       var awt = new awtrix();

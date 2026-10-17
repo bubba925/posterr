@@ -21,6 +21,11 @@ class Settings {
     this.plexHTTPS = DEFAULT_SETTINGS.plexHTTPS;
     this.plexPort = DEFAULT_SETTINGS.plexPort;
     this.plexToken = DEFAULT_SETTINGS.plexToken;
+    this.plex2Enabled = DEFAULT_SETTINGS.plex2Enabled;
+    this.plex2IP = DEFAULT_SETTINGS.plex2IP;
+    this.plex2HTTPS = DEFAULT_SETTINGS.plex2HTTPS;
+    this.plex2Port = DEFAULT_SETTINGS.plex2Port;
+    this.plex2Token = DEFAULT_SETTINGS.plex2Token;
     this.onDemandLibraries = DEFAULT_SETTINGS.onDemandLibraries;
     this.numberOnDemand = DEFAULT_SETTINGS.numberOnDemand;
     this.onDemandRefresh = DEFAULT_SETTINGS.onDemandRefresh;
@@ -147,6 +152,11 @@ class Settings {
       if(readSettings.enableLinks==undefined) readSettings.enableLinks = 'false';
       if(readSettings.recentlyAddedDays==undefined) readSettings.recentlyAddedDays = 0;
       if(readSettings.enableAwtrix==undefined) readSettings.enableAwtrix = 'false';
+      if(readSettings.plex2Enabled==undefined) readSettings.plex2Enabled = 'false';
+      if(readSettings.plex2IP==undefined) readSettings.plex2IP = '';
+      if(readSettings.plex2HTTPS==undefined) readSettings.plex2HTTPS = 'false';
+      if(readSettings.plex2Port==undefined) readSettings.plex2Port = 32400;
+      if(readSettings.plex2Token==undefined) readSettings.plex2Token = '';
       if(readSettings.rotate==undefined) readSettings.rotate = 'false';
     } catch (ex) {
       // do nothing if error as it reads ok anyhow
@@ -252,6 +262,16 @@ class Settings {
     else this.plexPort = cs.plexPort;
     if (jsonObject.plexToken) this.plexToken = jsonObject.plexToken;
     else this.plexToken = cs.plexToken;
+    if (jsonObject.plex2EnabledSwitch) this.plex2Enabled = jsonObject.plex2EnabledSwitch;
+    else this.plex2Enabled = "false";
+    if (jsonObject.plex2IP) this.plex2IP = jsonObject.plex2IP;
+    else this.plex2IP = cs.plex2IP;
+    if (jsonObject.plex2HTTPSSwitch) this.plex2HTTPS = jsonObject.plex2HTTPSSwitch;
+    else this.plex2HTTPS = "false";
+    if (jsonObject.plex2Port) this.plex2Port = jsonObject.plex2Port;
+    else this.plex2Port = cs.plex2Port;
+    if (jsonObject.plex2Token) this.plex2Token = jsonObject.plex2Token;
+    else this.plex2Token = cs.plex2Token;
     if (jsonObject.plexLibraries)
       this.onDemandLibraries = jsonObject.plexLibraries;
     else this.onDemandLibraries = cs.onDemandLibraries;

@@ -582,7 +582,52 @@
                     (<a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/"
                       target="_blank">details</a>)</small>
                 </div>
-                  
+
+                <hr>
+                <h5>Second Plex Server <small class="text-muted">(Now Screening only — on-demand and libraries stay on the server above)</small></h5>
+
+                <div class="form-group">
+                  <div class="custom-control custom-control-nolabel custom-switch ml-auto">
+                    <input type="checkbox" class="custom-control-input" name="plex2EnabledSwitch" id="plex2EnabledSwitch"
+                     value="true" <% if(typeof formData !== 'undefined' && errors){%><%=formData.plex2EnabledSwitch ? 'checked' : '' %><%}else{%><%=(settings.plex2Enabled == 'true') ? 'checked' : '' %><%}%>>
+                    <label class="custom-control-label" for="plex2EnabledSwitch">Enable Second Plex Server</label>
+                    <small id="plex2EnabledHelp" class="form-text text-muted">Also check this server for Now Screening, using the same user/device filters as the first server.</small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="custom-control custom-control-nolabel custom-switch ml-auto">
+                    <input type="checkbox" class="custom-control-input" name="plex2HTTPSSwitch" id="plex2HTTPSSwitch"
+                     value="true" <% if(typeof formData !== 'undefined' && errors){%><%=formData.plex2HTTPSSwitch ? 'checked' : '' %><%}else{%><%=(settings.plex2HTTPS == 'true') ? 'checked' : '' %><%}%>>
+                    <label class="custom-control-label" for="plex2HTTPSSwitch">HTTPS Connection</label>
+                    <small id="plex2HTTPSHelp" class="form-text text-muted">Enable if the second Plex server requires a HTTPS 'secure'
+                      connection.</small>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="plex2IP">Server IP or Domain Name</label>
+                  <input type="text" class="form-control" id="plex2IP" name="plex2IP" aria-describedby="plex2IPHelp"
+                    placeholder="n.n.n.n" value="<% if(typeof formData !== 'undefined' && errors){%><%=formData.plex2IP%>"<%}else{%><%=settings.plex2IP%>"<%}%>>
+                  <small id="plex2IPHelp" class="form-text text-muted">Enter the second Plex server IP or Domain Name.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="plex2IP">Server Port</label>
+                  <input type="text" class="form-control" id="plex2Port" name="plex2Port" aria-describedby="plex2PortHelp"
+                    placeholder="usually port 32400" value="<% if(typeof formData !== 'undefined' && errors){%><%=formData.plex2Port%>"<%}else{%><%=settings.plex2Port%>"<%}%>>
+                  <small id="plex2PortHelp" class="form-text text-muted">Enter the second server port. (usually 32400).</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="plex2Token">Plex Token</label>
+                  <input type="password" class="form-control" name="plex2Token" id="plex2Token" aria-describedby="plex2Token"
+                    placeholder="Plex Token" value="<% if(typeof formData !== 'undefined' && errors){%><%=formData.plex2Token%>"<%}else{%><%=settings.plex2Token%>"<%}%>>
+                  <small id="plex2TokenHelp" class="form-text text-muted">Needed to communicate with your second Plex server.
+                    (<a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/"
+                      target="_blank">details</a>)</small>
+                </div>
+
                 </div>
               </div>
             </div>
